@@ -3,218 +3,75 @@
 //darray.h
 //to be included with pa5.cpp
 #include "darray.tem"
-#include <cstdlib>
-#include <cassert>
-#include <iostream>
 
+#ifndef _DARRAY_h
+#define _DARRAY_h
 
-template<typename T>
-darray<T>::darray(): cap(0), used(0), data(NULL) //default with initialization list
+template <typename T> class darray;
+template <typename T> std::ostream& operator << (std::ostream&, const darray<T>&);
+
+template <typename T>
+class darray
 {
-}
-
-template<typename T>	
-darray<T>::darray (const darray& d)//copy
-{
-	T* temp = new T[d.cap];
-		for (int i = 0; i < d.used; i++)
-		{
-			temp[i] = d.data[i];
-		}
+public:
+	//constructors
+	darray (); //default
+	darray (const darray&); //copy
+	darray (unsigned int, unsigned int, T*);
 		
-		cap = d.cap;
-		used = d.used;
-		
-		//is this neccesary?
-	/*	if(d.data != NULL)
-		{
-			delete[] d.data;
-		}
-		if(data != NULL)
-		{
-			delete[] data;
-		}*/
-		data = temp;
-}
-
-template<typename T>
-darray<T>::darray (unsigned int size, unsigned int elementsUsed, T* dat)//parameterized
-{
-	cap = size;
-	used = elementsUsed;
-	data = dat;
-}
-
-//destructor
-template<typename T>
-darray<T>::~darray()
-{
-	delete [] data;
-	used=cap=0;
-	data=NULL;
-}
-
-//constant functions
-template<typename T>
-unsigned darray<T>::capacity () const
-{
-	return cap;
-}
-
-template<typename T>
-unsigned darray<T>::usedElements () const
-{
-	return used;
-}
+	//destructor
+	~darray();
 	
-//constant getter
-template<typename T>
-const T darray<T>::get(const unsigned int index) const
-{
-	assert(index <= used);
-	return data[index];
-}
-
-template<typename T>
-bool darray<T>::isEmpty()
-{
-	if (cap > 0)
-		return false;
-	else
-		return true;
-}
+	//constant functions
+	//Pre:none
+	//Post:returns member capacity
+	unsigned capacity () const;
+	//Pre:none
+	//Post:returns member used
+	unsigned usedElements () const;
 	
-//mutators
-template<typename T>
-void darray<T>::erase ()
-{
-	used = 0;
-}
+	//constant getter
+	//Pre: index of element to return
+	//Post: copy of element at index
+	const T get(const unsigned int) const;
+	
+	//Pre:None
+	//Post: returns true if cap is 0
+	bool isEmpty ();
 
-template<typename T>
-void darray<T>::eraseOne (T&)
-{
-	--used;
-}
+	//mutators
+	//Pre: none
+	//Post: sets used to 0, all capacity now available
+	void erase ();
+	//Pre: none
+	//Post: last entered element will be overwitten in next push
+	void eraseOne (T&);
+	//Pre: item to be pushed to array
+	//Post: item is pushed to next open element, capacity is doubled if array is full
+	void push (const T&);
+	//Pre: array is not empty
+	//Post: last element put in array is returned, then will be overwritten with next push
+	T pop ();
+	//Pre: none
+	//Post: none
+	void insert (const T, const unsigned int);
+	//Pre: none
+	//Post: none
+	/*const T* find (const T&) const;*/
 
-template<typename T>
-void darray<T>::push (const T& item)
-{
-	if ( cap == 0)
-	{
-		T* temp = new T[1];
-		data = temp;
-		cap ++;
-		data[used] = item;
-		used ++;
-		return;
-	}
-	if ( used < cap )
-	{
-		data[used] = item;
-		++ used;
-		return;
-	}
-	if ( cap == used && cap > 0 )
-	{
-		cap *= 2;
-		T* temp = new T[cap];
-		for (int i = 0; i < used; i++)
-		{
-			temp[i] = data[i];
-		}
-		if(data != NULL)
-		{
-			delete[] data;
-		}
-		data = temp; 
-		data[used] = item;
-		++ used;
-		return;
-	}
-}
+	//overloaded operators
+	T operator [] (unsigned int) const;
+	darray& operator = (const darray&);
 
-template<typename T>
-T darray<T>::pop ()
-{
-	assert (used != 0);
-	assert (data != NULL);
+	//friends
+	friend std::ostream& operator << <T>(std::ostream&, const darray<T>&);
+	
 
-	if (used > 1)
-	{
-		used--;
-        return data[used];
-    }
-	if (used == 1)
-	{
-		T temp = data[used - 1];
-		delete [] data;
-		cap = 0;
-		used--;
-		data = NULL;
-		return temp;
-	}
-}
+private:
+	unsigned int cap;
+	unsigned int used;
+	T* data;
 
-template<typename T>
-void darray<T>::insert (const T insertee, const unsigned int index)
-{
-	data[index] = insertee;
-}
+};
 
-//template<typename T>	
-//const T* darray::find (const T& query) const
-//{
-//	T* p = 0;
-//	for (int i = 0; i < used; i++)
-//	{
-//		if(data[i] == query)
-//			p = ???//finsih this
-//	}
-//	return p;
-//}
-
-//operators
-template<typename T>
-darray<T>& darray<T>::operator = (const darray& d)
-{
-	if (this != &d)
-	{
-		T* temp = new T[d.cap];
-		for (int i = 0; i < d.used; i++)
-		{
-			temp[i] = d.data[i];
-		}
-		used = d.used;
-		cap = d.cap;
-		if(d.data != NULL)
-		{
-			delete[] d.data;
-		}
-		if(data != NULL)
-		{
-			delete[] data;
-		}
-		data = temp;
-	}
-	return *this;
-}
-
-template<typename T>
-T darray<T>::operator [] (const unsigned index) const
-{
-	assert (index <= used);
-	return data[index];
-}
-
-template<typename T>
-std::ostream& operator << <T>(std::ostream& out, const darray<T>& d)
-{
-	std::cout << '(';
-	for (int 1 = 0; i<d.used-1; i++)
-	{
-		std::cout << d.data[i] << ',';
-	}
-	std::cout << d.data[i] << ')';
-	return out;
-}
+#endif
